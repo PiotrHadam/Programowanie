@@ -1,0 +1,5 @@
+Zings|Amadeusz|49|66
+Kowalczyk|Wojciech|45|81
+Kowal|Adam|32|69
+Kopeć|Marian|29|72
+Hadam|Piotr|23|75
