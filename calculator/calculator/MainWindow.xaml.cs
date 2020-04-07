@@ -111,23 +111,18 @@ namespace calculator
                 //Użycie operatora jednoargumentowego zmiany znaku liczby
                 else if (b.Equals(buttonSign))
                 {
-                    value = Double.Parse(textBlockCalc.Text);
-                    value *= -1;
-                    textBlockCalc.Text = value.ToString();
-                    textBlockEq.Text = value.ToString();
-                    operationPerformed = true;
+                    double val = Double.Parse(textBlockCalc.Text);
+                    val *= -1;
+                    textBlockCalc.Text = val.ToString();
                 }
                 //Użycie operatora jednoargumentowego pierwiastka z danej liczby
                 else if (b.Equals(buttonRoot))
                 {
                     if (value >= 0)
                     {
-                        value = Double.Parse(textBlockCalc.Text);
-                        double val = value;
-                        value = Math.Sqrt(val);
-                        textBlockCalc.Text = value.ToString();
-                        textBlockEq.Text = buttonRoot.Content.ToString() + val;
-                        operationPerformed = true;
+                        double val = Double.Parse(textBlockCalc.Text);
+                        val = Math.Sqrt(val);
+                        textBlockCalc.Text = val.ToString();
                     }
                     else
                     {
