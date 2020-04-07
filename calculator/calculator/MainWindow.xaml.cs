@@ -43,21 +43,17 @@ namespace calculator
             //Czyszczenie tekstu przed wpisaniem nowej liczby, gdy został użyty klawisz "=" i nie jest konieczne wpisanie 0
             if (isResult && isZeroCommaNecessery == false)
             {
-                textBoxCalc.Clear();
+                textBlockCalc.Text = "";
                 isResult = false;
             }
 
             isError();
 
             //Czyszcznie tekstu przed wpisaniem nowej liczby, gdy wpisane jest tylko 0 lub gdy został wpisany operator
-            if ((textBoxCalc.Text == "0") || (operationPerformed))
+            if ((textBlockCalc.Text == "0") || (operationPerformed))
             {
-                textBoxCalc.Clear();
+                textBlockCalc.Text = "";
             }
-
-            //Dopisanie symbolu z przycisku do tekstu
-            if (textBoxCalc.Text.Length < 12)
-                textBoxCalc.Text += b.Content.ToString();
 
             //Wpisanie znaku "."
             if (b.Equals(buttonDot))
@@ -66,19 +62,25 @@ namespace calculator
                 if (operationPerformed == false)
                 {
                     //Dopisanie "." tylko gdy nie ma jej jeszcze w tekście
-                    if (!textBoxCalc.Text.Contains("."))
+                    if (!textBlockCalc.Text.Contains(","))
                     {
-                        textBoxCalc.Text = textBoxCalc.Text + ".";
+                        textBlockCalc.Text = textBlockCalc.Text + ",";
                     }
                     isZeroCommaNecessery = false;
                 }
                 //Gdy znak "." jest poprzedzony bezpośrednio przez operator
                 else
                 {
-                    textBoxCalc.Text = "0.";
+                    textBlockCalc.Text = "0,";
                     isZeroCommaNecessery = true;
                 }
             }
+
+            //Dopisanie symbolu z przycisku do tekstu
+            else if (textBlockCalc.Text.Length < 12)
+                textBlockCalc.Text += b.Content.ToString();
+
+            
             operationPerformed = false;
         }
 
@@ -87,14 +89,14 @@ namespace calculator
         {
             Button b = (Button)sender;
 
-            int lengthText = textBoxCalc.Text.Length;
+            int lengthText = textBlockCalc.Text.Length;
 
             //Sprawdzenie, czy została wpisana liczba
-            if (textBoxCalc.Text.Length > 0)
+            if (textBlockCalc.Text.Length > 0)
             {
-                if (textBoxCalc.Text[lengthText - 1] == '.')
+                if (textBlockCalc.Text[lengthText - 1] == ',')
                 {
-                    textBoxCalc.Text = textBoxCalc.Text.Remove(lengthText - 1); //jeśli liczba zakończona "." - usunięcie jej z tekstu
+                    textBlockCalc.Text = textBlockCalc.Text.Remove(lengthText - 1); //jeśli liczba zakończona "." - usunięcie jej z tekstu
                 }
 
                 isError();
@@ -102,32 +104,34 @@ namespace calculator
                 //Sprawdzenie możliwości dzielenia
                 if (divideByZero())
                 {
-                    textBoxCalc.Text = errorDiv;
+                    textBlockCalc.Text = errorDiv;
                     operationPerformed = true;
                     operation = "";
                 }
                 //Użycie operatora jednoargumentowego zmiany znaku liczby
                 else if (b.Equals(buttonSign))
                 {
-                    value = Double.Parse(textBoxCalc.Text);
+                    value = Double.Parse(textBlockCalc.Text);
                     value *= -1;
-                    textBoxCalc.Text = value.ToString();
-                    textBlockEq.Text += value;
+                    textBlockCalc.Text = value.ToString();
+                    textBlockEq.Text = value.ToString();
+                    operationPerformed = true;
                 }
                 //Użycie operatora jednoargumentowego pierwiastka z danej liczby
                 else if (b.Equals(buttonRoot))
                 {
                     if (value >= 0)
                     {
-                        value = Double.Parse(textBoxCalc.Text);
+                        value = Double.Parse(textBlockCalc.Text);
                         double val = value;
                         value = Math.Sqrt(val);
-                        textBoxCalc.Text = value.ToString();
-                        textBlockEq.Text += buttonRoot.Content.ToString() + val;
+                        textBlockCalc.Text = value.ToString();
+                        textBlockEq.Text = buttonRoot.Content.ToString() + val;
+                        operationPerformed = true;
                     }
                     else
                     {
-                        textBoxCalc.Text = error;
+                        textBlockCalc.Text = error;
                         textBlockEq.Text = "";
                         value = 0;
                     }
@@ -140,11 +144,11 @@ namespace calculator
                     textBlockEq.Text = value + " " + operation;
                     operationPerformed = true;
                 }
-                //jeśli nie, pobranie wartości z pola textBoxCalc
+                //jeśli nie, pobranie wartości z pola textBlockCalc
                 else
                 {                
                     operation = b.Content.ToString();
-                    value = Double.Parse(textBoxCalc.Text);
+                    value = Double.Parse(textBlockCalc.Text);
                     textBlockEq.Text = value + " " + operation;                   
                     operationPerformed = true;
                 }
@@ -153,11 +157,10 @@ namespace calculator
 
         //UŻYCIE ZNAKU "="
         private void ButtonEq_Click(object sender, RoutedEventArgs e)
-        {
-            isResult = true;
-
+        {          
             textBlockEq.Text = "";
             PerformClickEquals();
+            isResult = true;
         }
 
         //FUNKCJE USUWAJĄCE TEKST
@@ -165,10 +168,12 @@ namespace calculator
         {
             Button b = (Button)sender;
 
+            isError();
+
             //Zresetowanie kalkulatora
             if (b.Equals(buttonC))
             {
-                textBoxCalc.Clear();
+                textBlockCalc.Text = "";
                 value = 0;
                 operation = "";
                 textBlockEq.Text = "";
@@ -176,8 +181,8 @@ namespace calculator
             //Usunięcie ostatniego znaku
             else if (b.Equals(buttonDel))
             {
-                if (textBoxCalc.Text.Length > 0)
-                    textBoxCalc.Text = textBoxCalc.Text.Substring(0, (textBoxCalc.Text.Length - 1));
+                if (textBlockCalc.Text.Length > 0)
+                    textBlockCalc.Text = textBlockCalc.Text.Substring(0, (textBlockCalc.Text.Length - 1));
             }
         }
 
@@ -186,35 +191,34 @@ namespace calculator
         {
             if (divideByZero())
             {
-                textBoxCalc.Text = errorDiv;
+                textBlockCalc.Text = errorDiv;
             }
-            else if (textBoxCalc.Text == errorDiv)
+            else if (textBlockCalc.Text == errorDiv || textBlockCalc.Text == error)
             {
-                textBoxCalc.Text = "0";
+                textBlockCalc.Text = "0";
             }
             else
             {
-                double newValue = Double.Parse(textBoxCalc.Text);
+                double newValue = Double.Parse(textBlockCalc.Text);
                 
                 if (operation == "+" && operationPerformed == false)
                 {
-                    textBoxCalc.Text = (value + newValue).ToString();
+                    textBlockCalc.Text = (value + newValue).ToString();
                 }
                 else if (operation == "-" && operationPerformed == false)
                 {
-                    textBoxCalc.Text = (value - newValue).ToString();
+                    textBlockCalc.Text = (value - newValue).ToString();
                 }
                 else if (operation == "*" && operationPerformed == false)
                 {
-                    textBoxCalc.Text = (value * newValue).ToString();
+                    textBlockCalc.Text = (value * newValue).ToString();
                 }
                 else if (operation == "/" && operationPerformed == false)
                 {
-                    textBoxCalc.Text = (value / newValue).ToString();
+                    textBlockCalc.Text = (value / newValue).ToString();
                 }
-
-                lengthCheck();
-                value = Double.Parse(textBoxCalc.Text);
+                
+                value = Double.Parse(textBlockCalc.Text);
                 operation = "";
             }
             operationPerformed = false;
@@ -224,7 +228,7 @@ namespace calculator
         //FUNKCJA SPRAWDZAJĄCA MOŻLIWOŚĆ DZIELENIA
         private bool divideByZero()
         {
-            if (operation == "/" && textBoxCalc.Text == "0")
+            if (operation == "/" && textBlockCalc.Text == "0")
             {
                 operation = "";
                 textBlockEq.Text = "";
@@ -239,119 +243,36 @@ namespace calculator
         //FUNKCJA SPRAWDZAJĄCA CZY TEKST WYŚWIETLA BŁĄD
         private void isError()
         {
-            if (textBoxCalc.Text == errorDiv || textBoxCalc.Text == error)
+            if (textBlockCalc.Text == errorDiv || textBlockCalc.Text == error)
             {
-                textBoxCalc.Text = "0";
-            }
-        }
-
-        //FUNKCJA SPRAWDZAJĄCA DŁUGOŚĆ WYŚWIETLANEGO TEKSTU
-        private void lengthCheck()
-        {
-            if (textBoxCalc.Text.Length > 18)
-            {
-                textBoxCalc.FontSize = 22;
+                textBlockCalc.Text = "0";
+                value = 0;
             }
         }
 
         //OBSŁUGA KLAWIATURY
-        private void TextBoxCalc_KeyDown(object sender, KeyEventArgs e)
+        private void TextBlockCalc_KeyDown(object sender, KeyEventArgs e)
         {
-            int key = (int)e.Key;
-            e.Handled = !(key >= 34 && key <= 43 || key >= 74 && key <= 83 || key == 88 || key == 2 || key == 85 || key == 87 || key == 84 || key == 89 || key == 6); //możliwe do użycia tylko klawisze z liczbami, operatorami dodawania, mnożenia, odejmowania i dzielenia oraz Enter i Backspace
-
-            if (key == 6) //działanie dla klawisza Enter - równoznaczne z przyciskiem "="
-            {
-                isResult = true;
-                textBlockEq.Text = "";
-                PerformClickEquals();
-            }
-            else if (key >= 34 && key <= 43 || key >= 74 && key <= 83 || key == 88) //obsługa wpisywania liczb i "."
-            {
-                if (isResult && isZeroCommaNecessery == false)
-                {
-                    textBoxCalc.Clear();
-                    isResult = false;
-                }
-
-                isError();
-
-                if ((textBoxCalc.Text == "0") || (operationPerformed))
-                {
-                    textBoxCalc.Clear();
-                }
-
-                if (key == 88) //kropka
-                {
-
-                    if (operationPerformed == false)
-                    {
-                        if (!textBoxCalc.Text.Contains("."))
-                        {
-                            textBoxCalc.Text = textBoxCalc.Text + ".";
-                            textBoxCalc.Select(textBoxCalc.Text.Length, 0);
-
-                        }
-                        isZeroCommaNecessery = false;
-                    }
-                    else
-                    {
-                        textBoxCalc.Text = "0.";
-                        isZeroCommaNecessery = true;
-                    }
-                    e.Handled = !(key >= 34 && key <= 43 || key >= 74 && key <= 83 || key == 2 || key == 85 || key == 87 || key == 84 || key == 89 || key == 6); //zablokowanie możliwości wpisania kolejnej "." do jednej liczby
-
-                }
-                operationPerformed = false;
-            }
-            else if (key == 84 || key == 85 || key == 87 || key == 89) //obsługa operatorów
-            {
-                int lengthText = textBoxCalc.Text.Length;
-
-                if (textBoxCalc.Text.Length > 0)
-                {
-
-                    if (textBoxCalc.Text[lengthText - 1] == '.')
-                    {
-                        textBoxCalc.Text = textBoxCalc.Text.Remove(lengthText - 1);
-                    }
-
-                    isError();
-                    if (divideByZero())
-                    {
-                        textBoxCalc.Text = errorDiv;
-                        operationPerformed = true;
-                        operation = "";
-                    }
-                    else if (value != 0)
-                    {   
-                        PerformClickEquals();
-                        switch (key)
-                        {
-                            case 84: operation = "*"; break;
-                            case 85: operation = "+"; break;
-                            case 87: operation = "-"; break;
-                            case 89: operation = "/"; break;
-                        }
-                        textBlockEq.Text = value + " " + operation;                  
-                        operationPerformed = true;
-                    }
-                    else
-                    {
-                        value = Double.Parse(textBoxCalc.Text);
-                        switch (key)
-                        {
-                            case 84: operation = "*"; break;
-                            case 85: operation = "+"; break;
-                            case 87: operation = "-"; break;
-                            case 89: operation = "/"; break;
-                        }
-                        textBlockEq.Text = value + " " + operation;
-                        operationPerformed = true;
-                    }
-                }
-                e.Handled = !(key >= 34 && key <= 43 || key >= 74 && key <= 83 || key == 88 || key == 2); //zablokowanie możliwości wpisania drugiego znaku operatora z rzędu
-            }
+            if (e.Key == Key.NumPad1 || e.Key == Key.D1) ButtonNum_Click(button1, null);
+            if (e.Key == Key.NumPad2 || e.Key == Key.D2) ButtonNum_Click(button2, null);
+            if (e.Key == Key.NumPad3 || e.Key == Key.D3) ButtonNum_Click(button3, null);
+            if (e.Key == Key.NumPad4 || e.Key == Key.D4) ButtonNum_Click(button4, null);
+            if (e.Key == Key.NumPad5 || e.Key == Key.D5) ButtonNum_Click(button5, null);
+            if (e.Key == Key.NumPad6 || e.Key == Key.D6) ButtonNum_Click(button6, null);
+            if (e.Key == Key.NumPad7 || e.Key == Key.D7) ButtonNum_Click(button7, null);
+            if (e.Key == Key.NumPad8 || e.Key == Key.D8) ButtonNum_Click(button8, null);
+            if (e.Key == Key.NumPad9 || e.Key == Key.D9) ButtonNum_Click(button9, null);
+            if (e.Key == Key.NumPad0 || e.Key == Key.D0) ButtonNum_Click(button0, null);
+            if (e.Key == Key.Add || e.Key == Key.OemPlus) ButtonFun_Click(buttonPlus, null);
+            if (e.Key == Key.Subtract || e.Key == Key.OemMinus) ButtonFun_Click(buttonMinus, null);
+            if (e.Key == Key.Multiply) ButtonFun_Click(buttonMulti, null);   
+            if (e.Key == Key.Divide || e.Key == Key.OemQuestion) ButtonFun_Click(buttonDiv, null);
+            if (e.Key == Key.R) ButtonFun_Click(buttonRoot, null);
+            if (e.Key == Key.Enter) ButtonEq_Click(buttonEq, null);
+            if (e.Key == Key.OemComma || e.Key == Key.OemPeriod || e.Key == Key.Decimal) ButtonNum_Click(buttonDot, null);
+            if (e.Key == Key.Back) ButtonClear_Click(buttonDel, null);
+            if (e.Key == Key.C) ButtonClear_Click(buttonC, null);
+            if (e.Key == Key.Escape) Close();
         }
     }
 }

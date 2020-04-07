@@ -1,0 +1,99 @@
+int key = (int)e.Key;
+            e.Handled = !(key >= 34 && key <= 43 || key >= 74 && key <= 83 || key == 88 || key == 85 || key == 87 || key == 84 || key == 89 || key == 6); //możliwe do użycia tylko klawisze z liczbami, operatorami dodawania, mnożenia, odejmowania i dzielenia oraz Enter i Backspace   
+
+            if (key == 6) //działanie dla klawisza Enter - równoznaczne z przyciskiem "="
+            {
+                textBlockEq.Text = "";
+                PerformClickEquals();
+                isResult = true;
+            }
+            else if (key == 2)
+            {
+                textBoxCalc.Clear();
+            }
+            else if (key >= 34 && key <= 43 || key >= 74 && key <= 83 || key == 88) //obsługa wpisywania liczb i "."
+            {
+                if (isResult && isZeroCommaNecessery == false)
+                {
+                    textBoxCalc.Clear();
+                    isResult = false;
+                }
+
+                isError();
+
+                if ((textBoxCalc.Text == "0") || (operationPerformed))
+                {
+                    textBoxCalc.Clear();
+                }
+
+                if (key == 88) //kropka
+                {
+
+                    if (operationPerformed == false)
+                    {
+                        if (!textBoxCalc.Text.Contains(","))
+                        {
+                            textBoxCalc.Text = textBoxCalc.Text + ",";
+                            textBoxCalc.Select(textBoxCalc.Text.Length, 0);
+
+                        }
+                        isZeroCommaNecessery = false;
+                    }
+                    else
+                    {
+                        textBoxCalc.Text = "0,";
+                        isZeroCommaNecessery = true;
+                    }
+                    e.Handled = !(key >= 34 && key <= 43 || key >= 74 && key <= 83 || key == 85 || key == 87 || key == 84 || key == 89 || key == 6); //zablokowanie możliwości wpisania kolejnej "." do jednej liczby
+
+                }
+                operationPerformed = false;
+            }
+            else if (key == 84 || key == 85 || key == 87 || key == 89) //obsługa operatorów
+            {
+                int lengthText = textBoxCalc.Text.Length;
+
+                if (textBoxCalc.Text.Length > 0)
+                {
+
+                    if (textBoxCalc.Text[lengthText - 1] == ',')
+                    {
+                        textBoxCalc.Text = textBoxCalc.Text.Remove(lengthText - 1);
+                    }
+
+                    isError();
+                    if (divideByZero())
+                    {
+                        textBoxCalc.Text = errorDiv;
+                        operationPerformed = true;
+                        operation = "";
+                    }
+                    else if (value != 0)
+                    {   
+                        PerformClickEquals();
+                        switch (key)
+                        {
+                            case 84: operation = "*"; break;
+                            case 85: operation = "+"; break;
+                            case 87: operation = "-"; break;
+                            case 89: operation = "/"; break;
+                        }
+                        textBlockEq.Text = value + " " + operation;                  
+                        operationPerformed = true;
+                    }
+                    else
+                    {
+                        value = Double.Parse(textBoxCalc.Text);
+                        switch (key)
+                        {
+                            case 84: operation = "*"; break;
+                            case 85: operation = "+"; break;
+                            case 87: operation = "-"; break;
+                            case 89: operation = "/"; break;
+                        }
+                        textBlockEq.Text = value + " " + operation;
+                        operationPerformed = true;
+                    }
+                }
+                e.Handled = !(key >= 34 && key <= 43 || key >= 74 && key <= 83 || key == 88); //zablokowanie możliwości wpisania drugiego znaku operatora z rzędu
+            }
